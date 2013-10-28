@@ -1,0 +1,30 @@
+{
+        "irc" : {
+            "nick" : "bot",
+            "alt_nick" : "bot_",
+            "bind_address" : "1.2.3.4",
+            "use_ssl" : 1,
+            "server_list" : [
+                "irc.freenode.net:6697"
+            ]
+        },
+
+# SendQ options:
+# - maxburst is the number of lines sent to the server before # doing penalty
+# calculations. The default is a burst of 6, which works on freenode.
+# - flood disables the penalty calculation. 
+        "sendq" : {
+            "maxburst" : 6,
+            "flood" : 0
+        },
+
+
+        "modules" : {
+            "NickServ" : {
+                "nickserv_user" : "username",
+                "nickserv_pass" : "password"
+            },
+            "Test" : {
+            },
+        }
+}
