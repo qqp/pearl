@@ -13,6 +13,7 @@ use Data::Dumper;
 my $connected = 0;
 my $reconnect_timer;
 my $stoned_timer;
+my $stoned_last_time;
 my $server_index = -1;
 my $config;
 
@@ -98,7 +99,11 @@ sub __init {
                 };
             } else {
                 $stoned_timer = AE::timer $config->{stoned_time}, $config->{stoned_time}, sub {
-                    raw("PING", time);
+                    if ($stoned_last_time && time - $stoned_last_time > $config->{stoned_timeout}) {
+                        $self->disconnect("Server is stoned");
+                    } else {
+                        raw("PING", time);
+                    }
                 };
             }
 
@@ -111,6 +116,7 @@ sub __init {
             $connected = 0;
             Bawt::SendQ::empty_queue();
             $stoned_timer = undef;
+            $stoned_last_time = 0;
             $reconnect_timer = AE::timer $config->{reconnect_time}, 0, sub {
                 $self->connect(@{ __next_server() }, $conn_cb);
             };
@@ -129,7 +135,8 @@ sub __init {
         },
         irc_pong => 500, sub {
             my ($self, $msg) = @_;
-            if (time - $msg->{params}[1] >= $config->{stoned_timeout}) {
+            $stoned_last_time = time;
+            if ($stoned_last_time - $msg->{params}[1] >= $config->{stoned_timeout}) {
                 $self->disconnect("Server is stoned");
             }
         },
