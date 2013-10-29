@@ -1,5 +1,8 @@
 package Bawt;
 
+use strict;
+use warnings;
+
 use Bawt::IRC;
 use Bawt::SendQ qw (raw);
 

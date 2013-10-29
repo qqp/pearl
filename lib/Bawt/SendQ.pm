@@ -1,5 +1,8 @@
 package Bawt::SendQ;
 
+use strict;
+use warnings;
+
 use Bawt::IRC;
 use AnyEvent;
 

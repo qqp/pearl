@@ -1,5 +1,8 @@
 package Bawt::Plugin::NickServ;
 
+use strict;
+use warnings;
+
 use AnyEvent;
 use Bawt::IRC;
 
