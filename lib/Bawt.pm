@@ -10,7 +10,7 @@ use Class::Load ':all';
 use Config::JSON;
 
 our $irc;
-our $modules;
+our %modules;
 my $config;
 
 sub config {
