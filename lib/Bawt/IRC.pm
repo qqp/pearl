@@ -101,7 +101,7 @@ sub __init {
                     $self->connect(@{ __next_server() }, $conn_cb);
                 };
             } else {
-                $stoned_timer = AE::timer $config->{stoned_time}, $config->{stoned_time}, sub {
+                $stoned_timer = AE::timer $config->{stoned_timeout}, $config->{stoned_timeout}, sub {
                     if ($stoned_last_time && AE::now - $stoned_last_time > $config->{stoned_timeout}) {
                         $self->disconnect("Server is stoned");
                     } else {
