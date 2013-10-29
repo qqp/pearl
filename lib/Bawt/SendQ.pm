@@ -70,9 +70,9 @@ sub send_low_priority {
 
 sub empty_queue {
     $penalty = 0;
-    $high_priority_queue = ();
-    $low_priority_queue = ();
-    $qpop_timer = undef;
+    @high_priority_queue = ();
+    @low_priority_queue = ();
+    $queue_pop_timer = undef;
     $penalty_lower_timer = undef;
 }
 

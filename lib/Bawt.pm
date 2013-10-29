@@ -11,6 +11,7 @@ use Config::JSON;
 
 our $irc;
 our $modules;
+my $config;
 
 sub config {
     my $cj = Config::JSON->new("config.json"); # FIXME: error handling.
