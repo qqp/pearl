@@ -58,14 +58,19 @@ sub __queue_pop {
 
 sub send_high_priority {
     return unless Bawt::IRC::is_connected();    # FIXME: should be == 2, add a separate routing to let the bot connect...
+
     push @high_priority_queue, [@_];
     if (!$flood) { $queue_pop_timer //= AE::timer 1, 1, \&__queue_pop; }
     &__queue_pop();
 }
 
 sub send_low_priority {
+    my ($target, $message, $maxlines) = @_;
     return unless Bawt::IRC::is_connected() == 2;
 
+    push @low_priority_queue, [ "PRIVMSG", $target, $message ];
+    if (!$flood) { $queue_pop_timer //= AE::timer 1, 1, \&__queue_pop; }
+    &__queue_pop(); 
 }
 
 sub empty_queue {
