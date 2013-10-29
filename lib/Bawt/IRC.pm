@@ -102,10 +102,10 @@ sub __init {
                 };
             } else {
                 $stoned_timer = AE::timer $config->{stoned_time}, $config->{stoned_time}, sub {
-                    if ($stoned_last_time && time - $stoned_last_time > $config->{stoned_timeout}) {
+                    if ($stoned_last_time && AE::now - $stoned_last_time > $config->{stoned_timeout}) {
                         $self->disconnect("Server is stoned");
                     } else {
-                        raw("PING", time);
+                        raw("PING", AE::now);
                     }
                 };
             }
@@ -138,7 +138,7 @@ sub __init {
         },
         irc_pong => 500, sub {
             my ($self, $msg) = @_;
-            $stoned_last_time = time;
+            $stoned_last_time = AE::now;
             if ($stoned_last_time - $msg->{params}[1] >= $config->{stoned_timeout}) {
                 $self->disconnect("Server is stoned");
             }
