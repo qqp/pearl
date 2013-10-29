@@ -1,0 +1,41 @@
+#
+# AnyEvent::HTTP doesn't make it especially pleasant to restrict the max size
+# of a request. The options are use want_body_handle and handle chunked
+# responses myself, or use a body callback and count bytes myself but blindly
+# accept whatever chunk size the server spits back.
+#
+# This patch lets me restrict the max chunk size. I suggest using a local
+# (perlbrew) perl install for the bot.
+#
+# NOTE: there are no guidelines on how large a chunk the server will send
+# back. Washingtonpost.com, for example, will send 32K for the first chunk.
+# You may need to experiment to see what max_chunk_size values work for you.
+#
+# FIXME: this is terribly, terribly hackish.
+#
+--- HTTP.pm.orig	2012-02-21 12:01:35.000000000 -0800
++++ HTTP.pm	2012-02-21 13:32:29.000000000 -0800
+@@ -717,6 +717,8 @@
+    return $cb->(undef, { @pseudo, Status => 599, Reason => "Too many redirections" })
+       if $recurse < 0;
+ 
++   my $max_chunk_size = $arg{max_chunk_size} || 0;
++
+    my $proxy   = exists $arg{proxy} ? $arg{proxy} : $PROXY;
+    my $timeout = $arg{timeout} || $TIMEOUT;
+ 
+@@ -968,6 +969,14 @@
+ 
+                my $len = hex $1;
+ 
++               if ($max_chunk_size && $len > $max_chunk_size) {
++                  $cl += $len;
++                  $_[0]->push_read (chunk => $max_chunk_size, sub {
++                     $on_body->($_[1], \%hdr);
++                     return $finish->(undef, 598 => "Request cancelled by on_body");
++                  });
++               }
++
+                if ($len) {
+                   $cl += $len;
+ 

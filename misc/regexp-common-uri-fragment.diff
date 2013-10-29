@@ -1,0 +1,26 @@
+# Patch Regexp::Common::URI to not strip http url fragments.
+#
+# Credit to http://d.hatena.ne.jp/hirose31/20061021/1161363303
+#
+# Alas there seems to be no interest in fixing this upstream :(
+#
+--- http.pm.orig	2013-02-15 15:23:15.000000000 -0400
++++ http.pm	2013-02-15 15:26:23.000000000 -0400
+@@ -2,7 +2,7 @@
+ 
+ use Regexp::Common               qw /pattern clean no_defaults/;
+ use Regexp::Common::URI          qw /register_uri/;
+-use Regexp::Common::URI::RFC2396 qw /$host $port $path_segments $query/;
++use Regexp::Common::URI::RFC2396 qw /$host $port $path_segments $query $fragment/;
+ 
+ use strict;
+ use warnings;
+@@ -12,7 +12,7 @@
+ 
+ 
+ my $http_uri = "(?k:(?k:http)://(?k:$host)(?::(?k:$port))?"           .
+-               "(?k:/(?k:(?k:$path_segments)(?:[?](?k:$query))?))?)";
++               "(?k:/(?k:(?k:$path_segments)(?:[?](?k:$query))?))?(?k:#$fragment)?)";
+ 
+ my $https_uri = $http_uri; $https_uri =~ s/http/https?/;
+ 
