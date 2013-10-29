@@ -47,9 +47,6 @@ sub run {
     $irc = Bawt::IRC::new();
 
     modules_config();
-    my $cfg = {};
-    $cfg->{nickserv_user} = "sqli";
-    $cfg->{nickserv_pass} = "LGLemopbiTPJefTpsSEjOEbygS38i9IF";
 
     Bawt::IRC::run();
     $cv->recv;
