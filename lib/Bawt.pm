@@ -21,9 +21,9 @@ sub config {
     $config->{maxburst} //= 6;
 
     Bawt::SendQ::config({
-            "flood" => $config->{flood},
-            "maxburst" => $config->{maxburst}
-        });
+        "flood" => $config->{flood},
+        "maxburst" => $config->{maxburst}
+    });
 
     Bawt::IRC::config($config->{irc});
 }

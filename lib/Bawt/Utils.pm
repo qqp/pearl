@@ -73,6 +73,7 @@ sub get_http($$$;$) {
                         $type eq "application/xhtml" ||
                         $type eq "application/xhtml+xml") {
 
+                    # Allow content-type tags to override the server-provided content-type.
                     my $p = HTML::PullParser->new(doc => $data, start => 'attr', report_tags => [qw(meta)]);
                     while (my $token = $p->get_token) {
                         my $attr = shift( @{$token} );
