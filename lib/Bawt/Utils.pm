@@ -16,8 +16,8 @@ our @EXPORT = qw(get_http shorten target);
 
 # Wrapper for http_request to limit response sizes. Suggests/requires the
 # ae-http.diff patch.
-sub get_http($$$) {
-    my ($url, $max, $cb) = @_;
+sub get_http($$$;$) {
+    my ($url, $max, $cb, $params) = @_;
     my $x = sub {
         my $data = '';
         my $size = 0;
@@ -46,7 +46,7 @@ sub get_http($$$) {
                     && ($hdr->{Status} != 598 || $hdr->{OrigStatus} !~ /^2/)) {
 
                     $data = "Error";
-                    $cb->($data, $hdr);
+                    $cb->($data, $hdr, $params);
                 }
 
                 $data = substr($data, 0, $max) if $max;
@@ -100,7 +100,7 @@ sub get_http($$$) {
                 $hdr->{Encoding} = $encoding;
                 $hdr->{Type} = $type;
             
-                $cb->($data, $hdr);
+                $cb->($data, $hdr, $params);
             };
     };
     &$x();
