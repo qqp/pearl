@@ -29,7 +29,6 @@ sub new {
         irc_privmsg => sub {
             my ($self, $msg) = @_;
 
-            print "Okay, so at least I landed here\n";
 #            return if ($heap->{'ignore'}($msg->{'prefix'}));       FIXME: Re-add ignore feature.
 
             my $what = $msg->{params}[1];
