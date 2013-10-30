@@ -5,6 +5,7 @@ use warnings;
 
 use Bawt::IRC;
 use AnyEvent;
+use Encode;
 
 my $flood = 0;
 my $penalty = 0;
@@ -56,6 +57,22 @@ sub __queue_pop {
     }
 }
 
+sub __chunk_by {
+    my ($text, $length) = @_;
+    my @out = ();
+
+    while (length($text) > $length) {
+        push @out, substr($text, 0, $length);
+        $text = substr($text, $length);
+    }
+
+    push @out, $text if ($text);
+
+    return @out;
+}
+
+# Data in the high priority queue gets the benefit of the doubt that it will
+# fit in a single message.
 sub send_high_priority {
     return unless Bawt::IRC::is_connected();    # FIXME: should be == 2, add a separate routing to let the bot connect...
 
@@ -64,11 +81,39 @@ sub send_high_priority {
     &__queue_pop();
 }
 
+# Data in the low priority queue doesn't. It's also assumed to be a PRIVMSG.
 sub send_low_priority {
     my ($target, $message, $maxlines) = @_;
     return unless Bawt::IRC::is_connected() == 2;
 
-    push @low_priority_queue, [ "PRIVMSG", $target, $message ];
+    $message = encode('utf8', $message);
+    $message =~ s/\001ACTION /\0777ACTION /g;
+    $message =~ s/[\000-\001]/ /g;
+    $message =~ s/\0777ACTION /\001ACTION /g;
+
+    my @lines = split(/\n/, $message);
+    my $limit = $maxlines // 50;
+
+    # IRC messages are always lines of characters terminated with a CR-LF
+    # (Carriage Return - Line Feed) pair, and these messages SHALL NOT
+    # exceed 512 characters in length, counting all characters including
+    # the trailing CR-LF. Thus, there are 510 characters maximum allowed
+    # for the command and its parameters.
+    # 512 chars per line, including command/target.
+    #
+    # There 12 non-message characters in a privmsg, so 498 bytes per line.
+
+    my $length = 498 - length($target) - length(Bawt::IRC::nuh());
+
+    # Split the output if it is too long
+    @lines = map { __chunk_by($_, $length) } @lines;
+    if (@lines > $limit) {
+        my $n = @lines;
+        @lines = @lines[0 .. ($limit - 1)];
+        push @lines, "error: output truncated to $limit of $n lines total"
+    }
+
+    push(@low_priority_queue, [ "PRIVMSG", $target, $_ ]) for @lines;
     if (!$flood) { $queue_pop_timer //= AE::timer 1, 1, \&__queue_pop; }
     &__queue_pop(); 
 }
