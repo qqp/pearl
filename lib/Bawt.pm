@@ -4,7 +4,8 @@ use strict;
 use warnings;
 
 use Bawt::IRC;
-use Bawt::SendQ qw (raw);
+use Bawt::SendQ;
+use Bawt::Channel;
 
 use Class::Load ':all';
 use Config::JSON;
@@ -12,6 +13,8 @@ use Config::JSON;
 our $irc;
 our %modules;
 my $config;
+
+my $channels;
 
 sub config {
     my $cj = Config::JSON->new("config.json"); # FIXME: error handling.
@@ -25,10 +28,13 @@ sub config {
         "maxburst" => $config->{maxburst}
     });
 
+
     Bawt::IRC::config($config->{irc});
 }
 
 sub modules_config {
+    $channels = Bawt::Channel->new($config->{channels} // {});
+
     foreach my $module (keys $config->{modules}) {
         use Data::Dumper;
 

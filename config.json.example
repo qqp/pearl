@@ -18,6 +18,9 @@
             "flood" : 0
         },
 
+        "channels" : {
+            "#omgwtfbbq" : { }
+        },
 
         "modules" : {
             "NickServ" : {
