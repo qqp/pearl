@@ -9,6 +9,8 @@
             ]
         },
 
+        "userlist" : "userlist.json",
+
 # SendQ options:
 # - maxburst is the number of lines sent to the server before # doing penalty
 # calculations. The default is a burst of 6, which works on freenode.

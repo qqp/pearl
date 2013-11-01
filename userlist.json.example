@@ -1,0 +1,6 @@
+{
+	"ignore" : {
+		"explanation for ignore" : "^.+!.+@badhost\.tld$",
+		"badnick123" : ".*\.tld$"
+	}
+}
