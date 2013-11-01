@@ -59,15 +59,15 @@ sub __mangle_nick {
     return (length($nick) >= $max_nick_len) ? join('', shuffle(split('', $nick))) : "${nick}_";
 }
 
-my $nick_change_error = sub {
+sub __nick_change_error {
     my ($self, $msg) = @_;
     raw("NICK", ($msg->{params}[1] eq $config->{nick})
             ? $config->{alt_nick}
             : __mangle_nick($msg->{params}[1])
     );
-};
+}
 
-my $conn_cb = sub {
+sub __conn_cb {
     my $fh = shift;
 
     if (defined($config->{bind_address})) {
@@ -77,7 +77,7 @@ my $conn_cb = sub {
     }
 
     return $config->{connect_timeout};
-};
+}
 
 sub __init {
     my $irc = AnyEvent::IRC::Connection->new();
@@ -98,7 +98,7 @@ sub __init {
 
             if ($error) {
                 $reconnect_timer = AE::timer $config->{reconnect_time}, 0, sub {
-                    $self->connect(@{ __next_server() }, $conn_cb);
+                    $self->connect(@{ __next_server() }, \&__conn_cb);
                 };
             } else {
                 $stoned_timer = AE::timer $config->{stoned_timeout}, $config->{stoned_timeout}, sub {
@@ -121,7 +121,7 @@ sub __init {
             $stoned_timer = undef;
             $stoned_last_time = 0;
             $reconnect_timer = AE::timer $config->{reconnect_time}, 0, sub {
-                $self->connect(@{ __next_server() }, $conn_cb);
+                $self->connect(@{ __next_server() }, \&__conn_cb);
             };
         },
         irc_nick => 500, sub {
@@ -169,9 +169,9 @@ sub __init {
             my ($nick, $user, $host) = @{$msg->{params}}[1..3];
             $bot_nuh = "$nick!$user\@$host";
         },
-        irc_433 => 500, $nick_change_error,
-        irc_436 => 500, $nick_change_error,
-        irc_437 => 500, $nick_change_error,
+        irc_433 => 500, \&__nick_change_error,
+        irc_436 => 500, \&__nick_change_error,
+        irc_437 => 500, \&__nick_change_error,
         read => sub {
             my ($self, $msg) = @_;
             print "Received: ".Dumper($msg)."\n";
@@ -186,7 +186,7 @@ sub __init {
 }
 
 sub run {
-    $Bawt::irc->connect(@{ __next_server() }, $conn_cb);
+    $Bawt::irc->connect(@{ __next_server() }, \&__conn_cb);
 }
 
 sub desired_nick {
