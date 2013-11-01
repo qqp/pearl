@@ -20,15 +20,14 @@ sub config {
     my $cj = Config::JSON->new("config.json"); # FIXME: error handling.
     $config = $cj->get();   # Ditto.
 
-    $config->{flood} //= 0;
-    $config->{maxburst} //= 6;
+    $config->{sendq}{flood} //= 0;
+    $config->{sendq}{maxburst} //= 6;
 
-    Bawt::SendQ::config({
-        "flood" => $config->{flood},
-        "maxburst" => $config->{maxburst}
+    Bawt::Userlist::config({
+        "userlist" => $config->{userlist}
     });
 
-
+    Bawt::SendQ::config($config->{sendq});
     Bawt::IRC::config($config->{irc});
 }
 

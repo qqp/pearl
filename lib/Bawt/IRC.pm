@@ -23,7 +23,7 @@ my $config;
 my $bot_nick;
 my $bot_nuh;
 
-our $max_nick_len;       # Probably safe defaults.
+our $max_nick_len;
 our $max_channel_len;
 our $max_topic_len;
 
@@ -40,7 +40,7 @@ sub config {
     $config->{stoned_timeout} //= 240;
     $config->{reconnect_time} //= 15;
 
-    $max_nick_len = $config->{max_nick_len} // 9;
+    $max_nick_len = $config->{max_nick_len} // 9;       # Probably safe defaults.
     $max_nick_len = $config->{max_channel_len} // 30;
     $max_nick_len = $config->{max_topic_len} // 320;
 
