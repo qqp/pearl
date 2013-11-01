@@ -4,8 +4,9 @@ use strict;
 use warnings;
 
 use Bawt::IRC;
-use Bawt::SendQ;
 use Bawt::Channel;
+use Bawt::SendQ;
+use Bawt::Userlist;
 
 use Class::Load ':all';
 use Config::JSON;
