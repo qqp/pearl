@@ -103,7 +103,7 @@ sub send_low_priority {
     #
     # There 12 non-message characters in a privmsg, so 498 bytes per line.
 
-    my $length = 498 - length($target) - length(Bawt::IRC::nuh());
+    my $length = 498 - length($target) - length(Bawt::IRC::nick_user_host());
 
     # Split the output if it is too long
     @lines = map { __chunk_by($_, $length) } @lines;

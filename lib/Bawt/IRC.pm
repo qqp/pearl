@@ -197,7 +197,7 @@ sub nick {
     return $bot_nick;
 }
 
-sub nuh {
+sub nick_user_host {
     return $bot_nuh;
 }
 
