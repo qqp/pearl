@@ -50,11 +50,13 @@ sub __get_title {
     my $target = target $msg;
     if (length($url) >= 35) {
         shorten $url, sub {
-            my $url = shift;
-            Bawt::IRC::msg($target, ($title) ? "$title -> $url" : "$url ($hdr->{Type})", 1);
+            my $min = shift;
+            if ($min ne $url || $title) {
+                Bawt::IRC::msg($target, ($title) ? "$title -> $url" : "$url ($hdr->{Type})", 1);
+            }
         };
-    } else {
-        Bawt::IRC::msg($target, ($title) ? "$title -> $url" : "$url ($hdr->{Type})", 1);
+    } elsif ($title) {
+        Bawt::IRC::msg($target, "$title -> $url", 1);
     }
 }
 
