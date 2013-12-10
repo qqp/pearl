@@ -87,7 +87,7 @@ sub send_low_priority {
     return unless Bawt::IRC::is_connected() == 2;
 
     $message = encode('utf8', $message);
-    $message =~ s/\001ACTION /\0777ACTION /g;
+    $message =~ s/\001ACTION /\0777ACTION /g;   # FIXME: do I even want to allow /me?
     $message =~ s/[\000-\001]/ /g;
     $message =~ s/\0777ACTION /\001ACTION /g;
 
