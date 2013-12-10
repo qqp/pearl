@@ -75,7 +75,7 @@ sub new {
         irc_privmsg => sub {
             my ($self, $msg) = @_;
 
-#            return if ($heap->{'ignore'}($msg->{'prefix'}));       FIXME: Re-add ignore feature.
+            return if (Bawt::Userlist::is_ignored($msg->{prefix}));
 
             my $what = $msg->{params}[1];
             while ($what =~ m/\b($RE{URI}{HTTP}{-scheme => 'https?'})/gi) {

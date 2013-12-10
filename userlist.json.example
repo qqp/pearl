@@ -1,6 +1,6 @@
 {
 	"ignore" : {
-		"explanation for ignore" : "^.+!.+@badhost\.tld$",
-		"badnick123" : ".*\.tld$"
+		"^.+!.+@badhost\\.tld$" : "explanation for ignore",
+		".*\\.tld$" : "backslashes need to be doubled"
 	}
 }
