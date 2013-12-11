@@ -75,10 +75,10 @@ sub new {
 
     $config = $cfg;
 
-    my $interval = $config->{poll} || 300;
+    $config->{poll} = $config->{poll} || 300;
     $cache = Bawt::Cache->new(filename => 'drudge', maxsize => 500);
 
-    $timer = AE::timer 0, $interval, sub {
+    $timer = AE::timer 0, $config->{poll}, sub {
         get_http "http://drudgereport.com/", 0, \&__parse_drudge;
     };
 
