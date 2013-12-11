@@ -148,7 +148,6 @@ sub __init {
             if (defined($config->{oper})) {
                 raw("OPER", $config->{oper});
             }
-            $connected = 2;
             $bot_nick = $msg->{params}[0];
             raw("WHOIS", $bot_nick);
         },
@@ -167,6 +166,7 @@ sub __init {
         irc_311 => 500, sub {
             my ($self, $msg) = @_;
             my ($nick, $user, $host) = @{$msg->{params}}[1..3];
+            $connected = 2;
             $bot_nuh = "$nick!$user\@$host";
         },
         irc_433 => 500, \&__nick_change_error,
