@@ -44,8 +44,11 @@ sub __scrape_feed {
     for my $entry (@$new_entries) {
         my $link  = $entry->[1]->link;
         my $title = $entry->[1]->title;
+
         next if ($cache->is_cached($link));
         $cache->cache_thing($link);
+
+        next if ($feedconfig->{firstrun});
 
         unless ($title) { $title = "No Title"; }
         next if $title eq "Featured Advertiser";    # fuck you wapo
@@ -76,6 +79,8 @@ sub __scrape_feed {
             }
         }
     }
+
+    $feedconfig->{firstrun} = 0;
     $cache->save(); 
 }
 
@@ -97,6 +102,7 @@ sub new {
         $feedconfig->{twitter} //= 0;
         $feedconfig->{poll} //= 300;
         $feedconfig->{name} = $name;
+        $feedconfig->{firstrun} = 1;
 
         if (!($feedconfig->{url} || $feedconfig->{target})) {
             print "Missing target channel or URL for this $feedconfig->{name}!\n";
