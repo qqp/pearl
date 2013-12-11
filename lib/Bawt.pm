@@ -36,8 +36,6 @@ sub modules_config {
     $channels = Bawt::Channel->new($config->{channels} // {});
 
     foreach my $module (keys $config->{modules}) {
-        use Data::Dumper;
-
         my ($flag, $error) = try_load_class("Bawt::Plugin::$module");
         if ($flag) {
             $modules{$module} = "Bawt::Plugin::$module"->new($config->{modules}{$module});

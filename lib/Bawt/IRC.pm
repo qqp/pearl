@@ -11,8 +11,6 @@ use AnyEvent::IRC::Util qw(mk_msg);
 use EV;
 use List::Util qw(shuffle);
 
-use Data::Dumper;
-
 my $connected = 0;
 my $reconnect_timer;
 my $stoned_timer;
@@ -174,11 +172,11 @@ sub __init {
         irc_437 => 500, \&__nick_change_error,
         read => sub {
             my ($self, $msg) = @_;
-            print "Received: ".Dumper($msg)."\n";
+            # FIXME: Tie in a debug/AE::log thing here.
         },
         send => sub {
             my ($self, $msg) = @_;
-            print "Sent: ".Dumper($msg)."\n";
+            # FIXME: Tie in a debug/AE::log thing here.
         }
     );
 
