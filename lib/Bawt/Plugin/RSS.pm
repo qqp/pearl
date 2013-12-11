@@ -5,6 +5,7 @@ use warnings;
 
 use AnyEvent;
 use AnyEvent::Feed;
+use AnyEvent::HTTP;
 use HTML::Entities;
 
 use Bawt::IRC;
