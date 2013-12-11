@@ -47,6 +47,7 @@ sub get_http($$$;$) {
 
                     $data = "Error";
                     $cb->($data, $hdr, $params);
+                    return;
                 }
 
                 $data = substr($data, 0, $max) if $max;
