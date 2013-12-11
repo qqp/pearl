@@ -123,6 +123,5 @@ sub target($) {
         ? (split /!/, $msg->{prefix}, 2)[0]
         : $msg->{params}[0];
 }
-  
-1;
 
+1;
