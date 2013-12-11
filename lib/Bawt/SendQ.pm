@@ -19,7 +19,7 @@ my $penalty_lower_timer;
 
 sub config {
     my $c = shift;
-    $maxburst = $c->{maxburst};
+    $maxburst = $c->{maxburst} // 6;
     $flood = $c->{flood};
 }
 
@@ -51,9 +51,9 @@ sub __queue_pop {
     }
 
     if ($flood) {
-        $penalty_lower_timer //= AE::timer 1, 1, \&__penalty_lower;
-    } else {
         $penalty = 0;
+    } else {
+        $penalty_lower_timer //= AE::timer 1, 1, \&__penalty_lower;
     }
 }
 
