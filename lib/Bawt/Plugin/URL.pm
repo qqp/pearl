@@ -20,7 +20,7 @@ sub __get_title {
 
     my ($url, $msg) = @$params;
 
-    if ($hdr->{Type} &&
+    if ($body != "Error" && $hdr->{Type} &&
             ($hdr->{Type} eq 'text/html' ||
             $hdr->{Type} eq 'application/xhtml' ||
             $hdr->{Type} eq 'application/xhtml+xml')) {
@@ -52,7 +52,7 @@ sub __get_title {
     if (length($url) >= 35) {
         shorten $url, sub {
             my $min = shift;
-            if ($min ne $url || $title) {
+            if (($min ne $url) || $title) {
                 Bawt::IRC::msg($target, ($title) ? "$title -> $min" : "$min ($hdr->{Type})", 1);
             }
         };
