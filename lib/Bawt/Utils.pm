@@ -70,6 +70,8 @@ sub get_http($$$;$) {
                     $type = "Unknown";
                 }
 
+                $hdr->{Type} = $type;
+
                 if ($type eq "text/html" ||
                         $type eq "application/xhtml" ||
                         $type eq "application/xhtml+xml") {
@@ -92,15 +94,13 @@ sub get_http($$$;$) {
                             last;
                         }
                     }
+
+                    if ($encoding && $encoding !~ /^utf/i) { Encode::Guess->set_suspects($encoding); }
+                    $hdr->{Encoding} = $encoding;
+
+                    my $tmp = eval { decode("Guess", $data); };
+                    if (!$@) { $data = $tmp; }
                 }
-
-                if ($encoding && $encoding !~ /^utf/i) { Encode::Guess->set_suspects($encoding); }
-
-                my $tmp = eval { decode("Guess", $data); };
-                if (!$@) { $data = $tmp; }
-
-                $hdr->{Encoding} = $encoding;
-                $hdr->{Type} = $type;
             
                 $cb->($data, $hdr, $params);
             };
