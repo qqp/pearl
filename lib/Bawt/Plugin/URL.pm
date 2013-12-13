@@ -20,9 +20,10 @@ sub __get_title {
 
     my ($url, $msg) = @$params;
 
-    if ($hdr->{Type} eq 'text/html' ||
+    if ($hdr->{Type} &&
+            ($hdr->{Type} eq 'text/html' ||
             $hdr->{Type} eq 'application/xhtml' ||
-            $hdr->{Type} eq 'application/xhtml+xml') {
+            $hdr->{Type} eq 'application/xhtml+xml')) {
 
         my $p = HTML::PullParser->new( 
             doc => $body,
@@ -44,15 +45,15 @@ sub __get_title {
                 last;
             }
         }
+        chomp $title;
     }
 
-    chomp $title;
     my $target = target $msg;
     if (length($url) >= 35) {
         shorten $url, sub {
             my $min = shift;
             if ($min ne $url || $title) {
-                Bawt::IRC::msg($target, ($title) ? "$title -> $url" : "$url ($hdr->{Type})", 1);
+                Bawt::IRC::msg($target, ($title) ? "$title -> $min" : "$min ($hdr->{Type})", 1);
             }
         };
     } elsif ($title) {
