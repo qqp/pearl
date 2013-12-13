@@ -3,13 +3,15 @@ package Bawt;
 use strict;
 use warnings;
 
+use AnyEvent;
+use AnyEvent::Log;
+use Class::Load ':all';
+use Config::JSON;
+
 use Bawt::IRC;
 use Bawt::Channel;
 use Bawt::SendQ;
 use Bawt::Userlist;
-
-use Class::Load ':all';
-use Config::JSON;
 
 our $irc;
 our %modules;
@@ -17,9 +19,16 @@ my $config;
 
 my $channels;
 
+our $debug;
+our $debugging;
+
 sub config {
-    my $cj = Config::JSON->new("config.json"); # FIXME: error handling.
-    $config = $cj->get();   # Ditto.
+    $Bawt::debug->("Test") if $Bawt::debugging;
+
+    my $cj = eval { Config::JSON->new("config.json"); };
+    if ($@) { AE::log error => "Error parsing config file \"config.json\""; $@ = undef; die; }
+
+    $config = $cj->get();
 
     $config->{sendq}{flood} //= 0;
     $config->{sendq}{maxburst} //= 6;
@@ -39,9 +48,9 @@ sub modules_config {
         my ($flag, $error) = try_load_class("Bawt::Plugin::$module");
         if ($flag) {
             $modules{$module} = "Bawt::Plugin::$module"->new($config->{modules}{$module});
-            print "Loaded Bawt::Plugin::$module\n";
+            AE::log info => "Loaded Bawt::Plugin::$module";
         } else {
-            print "Error loading module Bawt::Plugin::$module: $error\n";
+            AE::log error => "Error loading module Bawt::Plugin::$module: $error";
         }
     }
 }
@@ -60,6 +69,9 @@ sub new {
     my $me = shift;
     my $self = {};
     bless $self, $me;
+
+    $AnyEvent::Log::FILTER->level("debug");
+    $debug = AnyEvent::Log::logger debug => \$debugging;
 
     config();
     # Figure out what, if any, configuration to take from the user... config file, I guess.

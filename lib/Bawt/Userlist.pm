@@ -22,25 +22,25 @@ sub config {
     $params->{userlist} //= "";
 
     if (!$params->{userlist} || ! -e $params->{userlist}) {
-        print "No userfile, or empty userfile \"$params->{userlist}\"\n";
+        AE::log error => "No userfile, or empty userfile \"$params->{userlist}\"";
         die;
         return;
     }
     
     if (! -r $params->{userlist}) {
-        print "Unable to read userfile \"$params->{userlist}\"\n";
+        AE::log error => "Unable to read userfile \"$params->{userlist}\"";
         die;
         return;
     }
 
     # FIXME: Should probably be using croak/confess instead of die
     my $cj = eval { Config::JSON->new($params->{userlist}); };
-    if ($@) { print "Error parsing userlist \"$params->{userlist}\"\n"; $@ = undef; die; }
+    if ($@) { AE::log error => "Error parsing userlist \"$params->{userlist}\""; $@ = undef; die; }
     my $config = $cj->get();
 
     if (defined($config->{ignore})) {
         if (ref($config->{ignore}) ne "HASH") {
-            print "Ignore list should be a hash\n";
+            AE::log error => "Ignore list should be a hash";
             die;
         }
         @ignore_list = map qr/$_/i, keys $config->{ignore};

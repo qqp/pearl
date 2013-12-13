@@ -97,10 +97,12 @@ sub new {
         $feedconfig->{firstrun} = 1;
 
         if (!($feedconfig->{url} || $feedconfig->{target})) {
-            print "Missing target channel or URL for this $feedconfig->{name}!\n";
+            AE::log error => "Missing target channel or URL for this $feedconfig->{name}!";
             next;
         }
-        print "Adding $feedconfig->{url} ($feedconfig->{name}, every $feedconfig->{poll}s, messages to $feedconfig->{target})\n";
+
+        AE::log info => "Adding $feedconfig->{url} ($feedconfig->{name}, every $feedconfig->{poll}s, messages to $feedconfig->{target})";
+
         push @feeds, AnyEvent::Feed->new(
             url => $feedconfig->{url},
             interval => $feedconfig->{poll},
