@@ -10,11 +10,9 @@ use HTML::Entities;
 
 use Bawt::IRC;
 use Bawt::Utils;
-use Bawt::Cache; 
 
 $XML::Atom::ForceUnicode = 1;
 
-my $cache;
 my $config;
 my @feeds;
 my @strip;
@@ -44,9 +42,6 @@ sub __scrape_feed {
     for my $entry (@$new_entries) {
         my $link  = $entry->[1]->link;
         my $title = $entry->[1]->title;
-
-        next if ($cache->is_cached($link));
-        $cache->cache_thing($link);
 
         next if ($feedconfig->{firstrun});
 
@@ -81,7 +76,6 @@ sub __scrape_feed {
     }
 
     $feedconfig->{firstrun} = 0;
-    $cache->save(); 
 }
 
 sub new {
@@ -92,8 +86,6 @@ sub new {
     $config = $cfg;
 
     @strip = map qr/$_/i, $config->{strip};
-
-    $cache = Bawt::Cache->new(filename => 'rss', maxsize => 1500);
 
     foreach my $name (keys($config->{feeds})) {
         my $feedconfig = $config->{feeds}{$name};
