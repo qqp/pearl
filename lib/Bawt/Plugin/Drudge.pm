@@ -18,7 +18,7 @@ my $first_run = 1;
 
 sub __parse_drudge {
     my ($body, $hdr, $params) = @_;
-    return if ($body eq "Error");
+    return if ($hdr->{Status} !~ /^2/);
 
     my $p = HTML::PullParser->new(
         doc => $body,

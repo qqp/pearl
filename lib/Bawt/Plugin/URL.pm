@@ -20,7 +20,7 @@ sub __get_title {
 
     my ($url, $msg) = @$params;
 
-    if ($body != "Error" && $hdr->{Type} &&
+    if ($hdr->{Type} &&
             ($hdr->{Type} eq 'text/html' ||
             $hdr->{Type} eq 'application/xhtml' ||
             $hdr->{Type} eq 'application/xhtml+xml')) {

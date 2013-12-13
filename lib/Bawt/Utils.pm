@@ -42,9 +42,7 @@ sub get_http($$$;$) {
             sub {
                 my ($body, $hdr) = @_;
 
-                my $which = ($hdr->{Status} == 598) ? "OrigStatus" : "Status";
-                if ($hdr->{$which} !~ /^2/ && $hdr->{$which} != 404) {
-                    $data = "Error";
+                if ($hdr->{Status} =~ /^59/ && $hdr->{Status} != 598) {
                     $cb->($data, $hdr, $params);
                     return;
                 }
