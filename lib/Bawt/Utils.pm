@@ -86,7 +86,10 @@ sub get_http($$$;$) {
                             last if (!@contenttype);
                             for (my $i = 1; $i < $#contenttype + 1; $i++) {
                                 my ($key, $val) = split /=/, $contenttype[$i];
-                                if ($key eq "charset") { $encoding = $val; last; }
+                                if ($key eq "charset") {
+                                    $encoding = $val;
+                                    last;
+                                }
                             }
                             last;
                         }
@@ -96,7 +99,9 @@ sub get_http($$$;$) {
                     $hdr->{Encoding} = $encoding;
 
                     my $tmp = eval { decode("Guess", $data); };
-                    if (!$@) { $data = $tmp; }
+                    if (!$@) {
+                        $data = $tmp;
+                    }
                 }
             
                 $cb->($data, $hdr, $params);
@@ -111,7 +116,8 @@ sub shorten($$) {
     my $temp_url = uri_escape_utf8($url);
     get_http "http://is.gd/create.php?format=simple&url=$temp_url", 1024, sub { 
         my ($body, $hdr) = @_;
-        $cb->(($hdr->{Status} =~ /^2/ ) ? $body : $url);
+        my $shorturl = ($hdr->{Status} =~ /^2/) ? $body : $url;
+        $cb->($shorturl);
     };
 }
 
