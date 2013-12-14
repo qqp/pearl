@@ -22,8 +22,7 @@ my $channels;
 sub __config {
     my $config_file = shift;
 
-sub config {
-    $Bawt::debug->("Test") if $Bawt::debugging;
+    AE::log note => "Configuring using $config_file\n";
 
     my $cj = eval { Config::JSON->new($config_file); };
     if ($@) { AE::log error => "Error parsing config file \"config.json\""; $@ = undef; die; }
@@ -48,7 +47,7 @@ sub modules_config {
         my ($flag, $error) = try_load_class("Bawt::Plugin::$module");
         if ($flag) {
             $modules{$module} = "Bawt::Plugin::$module"->new($config->{modules}{$module});
-            AE::log info => "Loaded Bawt::Plugin::$module";
+            AE::log note => "Loaded Bawt::Plugin::$module";
         } else {
             AE::log error => "Error loading module Bawt::Plugin::$module: $error";
         }
@@ -70,8 +69,7 @@ sub new {
     my $self = {};
     bless $self, $me;
 
-    $AnyEvent::Log::FILTER->level("debug");
-    $debug = AnyEvent::Log::logger debug => \$debugging;
+    $AnyEvent::Log::FILTER->level("info");
 
     my $config_file = shift;
     __config($config_file);

@@ -49,6 +49,7 @@ sub __next_server {
     $server_index = ($server_index + 1) % @{$config->{server_list}};
     my ($host, $port) = split /:/, $config->{server_list}[$server_index];
     $port //= 6667;
+    AE::log note => "Connecting to $host:$port";
     return [ $host, $port ];           
 }
 
@@ -95,12 +96,15 @@ sub __init {
             my ($self, $error) = @_;
 
             if ($error) {
+                AE::log warn => "Error connecting to server ($error), trying another in $config->{reconnect_time}";
                 $reconnect_timer = AE::timer $config->{reconnect_time}, 0, sub {
                     $self->connect(@{ __next_server() }, \&__conn_cb);
                 };
+                return;
             } else {
                 $stoned_timer = AE::timer $config->{stoned_timeout}, $config->{stoned_timeout}, sub {
                     if ($stoned_last_time && AE::now - $stoned_last_time > $config->{stoned_timeout}) {
+                        AE::log warn => "Server is stoned, disconnecting.";
                         $self->disconnect("Server is stoned");
                     } else {
                         raw("PING", AE::now);
@@ -108,11 +112,15 @@ sub __init {
                 };
             }
 
+            AE::log note => "Connected to server.";
+
             raw("NICK", $config->{nick});
             raw("USER", $config->{user_name}, "*", "0", $config->{real_name});
         },
         disconnect => 500, sub {
             my $self = shift;
+
+            AE::log note => "Disconnected from server.";
 
             $connected = 0;
             Bawt::SendQ::empty_queue();

@@ -41,14 +41,17 @@ sub new {
             if ($msg->{prefix} eq "NickServ!NickServ\@services.") {
                 my $wanted = Bawt::IRC::desired_nick();
                 if ($msg->{params}[1] =~ /^You are now identified for/) {
+                    AE::log info => "Identified for $config->{nickserv_user}.";
                     $identified = 1;
                     $id_timer = undef;
                     if (Bawt::IRC::nick() ne $wanted) {
                         Bawt::IRC::raw("NICK", $wanted);
                     }
                 } elsif ($msg->{params}[1] =~ /has been ghosted.$/) {
+                    AE::log info => "Ghosted nick $wanted.";
                     Bawt::IRC::raw("PRIVMSG", "NickServ", "RELEASE $wanted");
                 } elsif ($msg->{params}[1] =~ /has been released.$/) {
+                    AE::log info => "Released nick $wanted.";
                     Bawt::IRC::raw("NICK", $wanted);
                 }
             }

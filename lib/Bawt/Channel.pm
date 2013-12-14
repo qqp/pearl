@@ -17,6 +17,7 @@ sub __check_removed_user {
     my ($self, $msg) = @_;
     
     if (defined($msg->{params}[1]) && $msg->{params}[1] eq Bawt::IRC::nick()) {
+        AE::log info => "Oops, I left $msg->{params}[0].";
         my ($i) = grep { $msg->{params}[0] eq $channel_list[$_] } 0 .. $#channel_list;
         splice @channel_list, $i, 1;
     }
@@ -32,7 +33,10 @@ sub new {
     $Bawt::irc->reg_cb(
         irc_001 => sub {
             my ($self, $msg) = @_;
-            Bawt::IRC::raw("JOIN", $_) for (keys $config);
+            foreach (keys $config) {
+               AE::log info => "Joining channel $_";
+               Bawt::IRC::raw("JOIN", $_);
+            }
 
             # FIXME: can probably rework this to only run when we're not on at
             # least one channel.
@@ -49,12 +53,16 @@ sub new {
                 }
 
                 delete @diff{ @channel_list };
-                Bawt::IRC::raw("JOIN", $_) for (keys %diff);
+                foreach (keys %diff) {
+                    AE::log info => "Joining channel $_";
+                    Bawt::IRC::raw("JOIN", $_);
+                }
             };
         },
         irc_join => sub {
             my ($self, $msg) = @_;
             if ((split /!/, $msg->{prefix}, 2)[0] eq Bawt::IRC::nick()) {
+                AE::log info => "Joined $msg->{params}[0].";
                 push @channel_list, $msg->{params}[0];
             }
         },
