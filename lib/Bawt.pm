@@ -19,13 +19,13 @@ my $config;
 
 my $channels;
 
-our $debug;
-our $debugging;
+sub __config {
+    my $config_file = shift;
 
 sub config {
     $Bawt::debug->("Test") if $Bawt::debugging;
 
-    my $cj = eval { Config::JSON->new("config.json"); };
+    my $cj = eval { Config::JSON->new($config_file); };
     if ($@) { AE::log error => "Error parsing config file \"config.json\""; $@ = undef; die; }
 
     $config = $cj->get();
@@ -73,7 +73,8 @@ sub new {
     $AnyEvent::Log::FILTER->level("debug");
     $debug = AnyEvent::Log::logger debug => \$debugging;
 
-    config();
+    my $config_file = shift;
+    __config($config_file);
     # Figure out what, if any, configuration to take from the user... config file, I guess.
 
     return $self;

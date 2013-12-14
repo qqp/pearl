@@ -4,5 +4,5 @@ use Bawt;
 use warnings;
 use strict;
 
-my $bot = Bawt->new();
+my $bot = Bawt->new("config.json");
 $bot->run();
