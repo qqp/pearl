@@ -14,7 +14,7 @@ use List::Util qw(shuffle);
 my $connected = 0;
 my $reconnect_timer;
 my $stoned_timer;
-my $stoned_last_time;
+my $last_pong;
 my $server_index = -1;
 my $config;
 
@@ -35,7 +35,7 @@ sub config {
     $config->{use_ssl} //= 0;
 
     $config->{connect_timeout} //= 15;
-    $config->{stoned_timeout} //= 240;
+    $config->{stoned_timeout} //= 300;
     $config->{reconnect_time} //= 15;
 
     $max_nick_len = $config->{max_nick_len} // 9;       # Probably safe defaults.
@@ -102,9 +102,9 @@ sub __init {
                 };
                 return;
             } else {
-                $stoned_timer = AE::timer $config->{stoned_timeout}, $config->{stoned_timeout}, sub {
-                    if ($stoned_last_time && AE::now - $stoned_last_time > $config->{stoned_timeout}) {
-                        AE::log warn => "Server is stoned, disconnecting.";
+                $stoned_timer = AE::timer $config->{stoned_timeout}/2, $config->{stoned_timeout}/2, sub {
+                    if ($last_pong && AE::now - $last_pong >= $config->{stoned_timeout}) {
+                        AE::log warn => "Server is stoned, disconnecting (No ping response).";
                         $self->disconnect("Server is stoned");
                     } else {
                         raw("PING", AE::now);
@@ -125,7 +125,7 @@ sub __init {
             $connected = 0;
             Bawt::SendQ::empty_queue();
             $stoned_timer = undef;
-            $stoned_last_time = 0;
+            $last_pong = undef;
             $reconnect_timer = AE::timer $config->{reconnect_time}, 0, sub {
                 $self->connect(@{ __next_server() }, \&__conn_cb);
             };
@@ -144,8 +144,9 @@ sub __init {
         },
         irc_pong => 500, sub {
             my ($self, $msg) = @_;
-            $stoned_last_time = AE::now;
-            if ($stoned_last_time - $msg->{params}[1] >= $config->{stoned_timeout}) {
+            $last_pong = AE::now;
+            if ($last_pong - $msg->{params}[1] >= $config->{stoned_timeout}) {
+                AE::log warn => "Server is stoned, disconnecting (Late ping response).";
                 $self->disconnect("Server is stoned");
             }
         },
