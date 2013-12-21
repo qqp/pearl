@@ -95,7 +95,6 @@ sub new {
     $Bawt::irc->reg_cb(
         irc_privmsg => sub {
             my ($self, $msg) = @_;
-            my $heap = $self->heap();
 
             return if (Bawt::Userlist::is_ignored($msg->{prefix}));
 
