@@ -1,4 +1,5 @@
-BEGIN { unshift @INC, 'lib'; }
+use FindBin;
+use lib "$FindBin::RealBin/lib";
 
 use Bawt;
 use warnings;
