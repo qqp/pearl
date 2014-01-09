@@ -3,6 +3,7 @@ package Bawt::Cache;
 use strict;
 use warnings;
 
+use Bawt;
 use Carp qw(croak);
 use Storable;
 
@@ -31,7 +32,7 @@ sub is_cached {
 
 sub save {
     my $self = shift;
-    store \@{$self->{cache_l}}, "cache/$self->{filename}.cache";
+    store \@{$self->{cache_l}}, $self->{cachepath};
 }
 
 sub new {
@@ -40,14 +41,16 @@ sub new {
     my %params = @_;
     my $self = bless \%params, $me;
 
-    $self->{filename} ||= 'cache';
+    croak "No cache file name provided" if !$self->{name};
     $self->{maxsize}  ||= 500;
 
     $self->{cache_l} = ();
     $self->{cache_h} = ();
 
-    if ( -e "cache/$self->{filename}.cache") {
-        $self->{cache_l} = retrieve("cache/$self->{filename}.cache");
+    $self->{cachepath} = Bawt::fix_up_path($self->{name}, "cache");
+
+    if (-e $self->{cachepath}) {
+        $self->{cache_l} = retrieve($self->{cachepath});
 
         if ($#{$self->{cache_l}} > $self->{maxsize}) {
             $#{$self->{cache_l}} = $self->{maxsize} - 1;
