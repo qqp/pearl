@@ -7,6 +7,8 @@ use AnyEvent;
 use AnyEvent::Log;
 use Class::Load ':all';
 use Config::JSON;
+use FindBin;
+use File::Spec::Functions qw(file_name_is_absolute splitpath catdir catfile);
 
 use Bawt::IRC;
 use Bawt::Channel;
@@ -29,15 +31,25 @@ sub __config {
 
     $config = $cj->get();
 
+    $config->{basedir} //= $FindBin::RealBin;
     $config->{sendq}{flood} //= 0;
     $config->{sendq}{maxburst} //= 6;
 
     Bawt::Userlist::config({
-        "userlist" => $config->{userlist}
+        "userlist" => fix_up_path($config->{userlist})
     });
 
     Bawt::SendQ::config($config->{sendq});
     Bawt::IRC::config($config->{irc});
+}
+
+sub fix_up_path {
+    my $origpath = shift;
+
+    return $origpath if (file_name_is_absolute($origpath));
+
+    my ($dir, $file) = (splitpath($origpath))[1,2];
+    return catfile(catdir($config->{basedir}, $dir), $file);
 }
 
 sub modules_config {
