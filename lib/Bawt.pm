@@ -49,7 +49,7 @@ sub fix_up_path {
     return $origpath if (file_name_is_absolute($origpath));
 
     my ($dir, $file) = (splitpath($origpath))[1,2];
-    return catfile(catdir($config->{basedir}, $dir), $file);
+    return catfile(catdir($config->{basedir}, @_, $dir), $file);
 }
 
 sub modules_config {
@@ -85,7 +85,6 @@ sub new {
 
     my $config_file = shift;
     __config($config_file);
-    # Figure out what, if any, configuration to take from the user... config file, I guess.
 
     return $self;
 }
