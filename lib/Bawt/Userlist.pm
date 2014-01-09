@@ -22,13 +22,13 @@ sub config {
     $params->{userlist} //= "";
 
     if (!$params->{userlist} || ! -e $params->{userlist}) {
-        AE::log error => "No userfile, or empty userfile \"$params->{userlist}\"";
+        AE::log error => "No userlist provided \"$params->{userlist}\"";
         die;
         return;
     }
     
     if (! -r $params->{userlist}) {
-        AE::log error => "Unable to read userfile \"$params->{userlist}\"";
+        AE::log error => "Unable to read userlist \"$params->{userlist}\"";
         die;
         return;
     }
