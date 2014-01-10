@@ -43,6 +43,7 @@ sub __config {
     Bawt::IRC::config($config->{irc});
 }
 
+# Make sure relative path references go somewhere sane.
 sub fix_up_path {
     my $origpath = shift;
 
