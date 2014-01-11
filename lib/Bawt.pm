@@ -32,9 +32,6 @@ sub __config {
     $config = $cj->get();
 
     $config->{basedir} //= $FindBin::RealBin;
-    $config->{sendq}{flood} //= 0;
-    $config->{sendq}{maxburst} //= 6;
-
     Bawt::Userlist::config({
         "userlist" => fix_up_path($config->{userlist})
     });

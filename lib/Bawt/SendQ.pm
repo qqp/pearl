@@ -20,7 +20,7 @@ my $penalty_lower_timer;
 sub config {
     my $c = shift;
     $maxburst = $c->{maxburst} // 6;
-    $flood = $c->{flood};
+    $flood = $c->{flood} // 0;
 }
 
 sub __penalty_lower {
