@@ -9,6 +9,7 @@ use Class::Load ':all';
 use Config::JSON;
 use FindBin;
 use File::Spec::Functions qw(file_name_is_absolute splitpath catdir catfile);
+use POSIX;
 
 use Bawt::IRC;
 use Bawt::Channel;
@@ -32,10 +33,16 @@ sub __config {
     $config = $cj->get();
 
     $config->{basedir} //= $FindBin::RealBin;
-    Bawt::Userlist::config({
-        "userlist" => fix_up_path($config->{userlist})
-    });
+    $config->{foreground} //= 0;
+    $config->{pidfile} //= "bot.pid";
+    $config->{pidfile} = fix_up_path($config->{pidfile});
+    if ($config->{logfile}) {
+        $config->{logfile} = fix_up_path($config->{logfile});
+    }
+    $config->{loglevel} //= "note";
+    $AnyEvent::Log::FILTER->level($config->{loglevel});
 
+    Bawt::Userlist::config({ "userlist" => fix_up_path($config->{userlist}) });
     Bawt::SendQ::config($config->{sendq});
     Bawt::IRC::config($config->{irc});
 }
@@ -69,6 +76,34 @@ sub run {
     $irc = Bawt::IRC::new();
 
     modules_config();
+
+    if ($config->{logfile}) {
+        $AnyEvent::Log::LOG->log_to_file($config->{logfile});
+    }
+
+    if (!$config->{foreground}) {
+        eval {
+            open PIDFILE, ">$config->{pidfile}" or die "Couldn't open pid file: $!";
+            open STDIN, '/dev/null' or die "Error opening /dev/null: $!";
+            open STDOUT, '>/dev/null' or die "Error opening /dev/null: $!";
+
+            defined(my $pid = fork) or die "Can't fork: $!";
+            if ($pid) {
+                print PIDFILE "$pid\n";
+                exit;
+            } else {
+                close PIDFILE;
+            }
+
+            setsid or die "Can't start a new session: $!";
+            open STDERR, '>&STDOUT' or die "Can't dup stdout: $!";
+        };
+
+        if ($@) {
+            AE::log error => $@;
+            exit;
+        }
+    }
 
     Bawt::IRC::run();
     $cv->recv;
